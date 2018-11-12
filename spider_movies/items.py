@@ -10,5 +10,8 @@ import scrapy
 
 class SpiderMoviesItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    mid = scrapy.Field()
+    name = scrapy.Field()
+    date = scrapy.Field()
+    addr = scrapy.Field()
+

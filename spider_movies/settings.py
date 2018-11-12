@@ -63,9 +63,9 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'spider_movies.pipelines.SpiderMoviesPipeline': 300,
-#}
+ITEM_PIPELINES = {
+#    'spider_movies.pipelines.MoviesMongoPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -92,4 +92,4 @@ ROBOTSTXT_OBEY = False
 FEED_EXPORT_ENCODING = 'utf-8'
 
 # mongodb setting
-MONGODB_NAME = 'spider'
+DB_NAME = 'movies'

@@ -3,7 +3,10 @@
 Author: Kris Shin
 Edit Time: 18-11-11 20:11:17
 '''
+import time
 import scrapy
+
+from spider_movies.items import SpiderMoviesItem
 
 
 class YgSpiderSpider(scrapy.Spider):
@@ -12,6 +15,7 @@ class YgSpiderSpider(scrapy.Spider):
     start_urls = ['http://ygdy8.com']
 
     def start_requests(self):
+        # set header to cover spider
         headers = {
             'User-Agent':
             'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; 360SE)',
@@ -28,14 +32,32 @@ class YgSpiderSpider(scrapy.Spider):
             'Content-Type':
             'application/x-www-form-urlencoded; charset=UTF-8'
         }
-        key_word = input('Please input file name:\n>>>')
-        return scrapy.Request(
-            url='http://s.ygdy8.com/plus/so.php?typeid=1&keyword=%s' %
-            key_word,
-            headers=headers,
-            method='GET',
-            callback=self.parse,
-        )
+        # key_word = input('Please input file name:\n>>>')  # set search word here
+        for page in range(170):
+            time.sleep(1)
+            yield scrapy.Request(
+                url='http://www.ygdy8.com/html/gndy/dyzz/list_23_%s.html' %
+                str(page + 1),  # %key_word,
+                headers=headers,
+                method='GET',
+                callback=self.parse)
 
     def parse(self, response):
-        print(response.text)
+        # get all movies
+        movies = response.selector.xpath('//ul//table[@class="tbspan"]')
+
+        for movie in movies:
+            film = SpiderMoviesItem()
+            id_date = movie.xpath('.//tr//td/b/a/@href').extract_first()
+            film['mid'] = id_date.split('/')[-1].split('.')[-2]
+            film['name'] = movie.xpath('.//tr//td/b/a/text()').extract_first()
+            film['date'] = id_date.split('/')[-2]
+            url = 'http://ygdy8.com' + id_date
+            yield scrapy.Request(
+                url=url, meta={'film': film}, callback=self.parse_addr)
+
+    def parse_addr(self, response):
+        film = response.meta['film']
+        film['addr'] = response.selector.xpath(
+            '//div[@class="co_content8"]//a/@href').extract_first().strip()
+        yield film
