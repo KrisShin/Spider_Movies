@@ -40,25 +40,30 @@ class S80SpiderSpider(Spider):
     def parse_list(self, response):
         items = response.selector.xpath('//ul[@class="me1 clearfix"]//li')
 
-        for item in items:
-            time.sleep(2)
-            film = SpiderMoviesItem()
-            film['mid'] = item.xpath('./h3/a/@href').extract_first().split(
-                '/')[-1]
-            film['name'] = item.xpath('./h3/a/text()').extract_first().strip()
-            url = S80SpiderSpider.start_urls[0][:-1] + item.xpath(
-                './h3/a/@href').extract_first()
-            yield Request(
-                url=url, meta={'film': film}, callback=self.parse__date_addr)
+        # for item in items:
+        item = items[0]
+        time.sleep(2)
+        film = SpiderMoviesItem()
+        film['mid'] = item.xpath('./h3/a/@href').extract_first().split('/')[-1]
+        film['name'] = item.xpath('./h3/a/text()').extract_first().strip()
+        url = S80SpiderSpider.start_urls[0][:-1] + item.xpath(
+            './h3/a/@href').extract_first()
+        yield Request(
+            url=url, meta={'film': film}, callback=self.parse__date_addr)
 
     def parse__date_addr(self, response):
         film = response.meta['film']
-        # film['date'] = response.selector.xpath(
-        #     '//div[@class="info"]/div[@class="clearfix"]//span//text()'
-        # ).extract()
-        re_date = '上映日期：</span>"(\d{4}-\d{2}-\d{2}"'
-        data = re.match(re_date, response.text).groups()
-        print(data)
+        film['date'] = None
+        info_list = response.selector.xpath(
+            '//div[@id="minfo"]/div[@class="info"]/div[@class="clearfix"]/span[3]//text()'
+        ).extract()
+        sub_info = []
+        for info in info_list:
+            sub_info.append(info.strip())
+        # print()
+        # re_date = '上映日期：</span>"(\d{4}-\d{2}-\d{2}"'
+        # data = re.match(re_date, response.text)
+        print('-----------------------------------------------',info_list)
         # film['addr'] = response.selector.xpath(
         #     '//div[@id="cpdl2list"]//li//span[@class="xunlei dlbutton1"]/a/@href'
         # ).extract_first()
